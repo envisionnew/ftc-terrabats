@@ -1,0 +1,3 @@
+[submodule "2018/ftc_app"]
+	path = 2018/ftc_app
+	url = git@github.com:ftctechnh/ftc_app.git
