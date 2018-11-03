@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 
-public class Terrabot {
+public class TerraBot {
 
     /*/ Define all the motors and variables that are being used in Terrabot /*/
 
