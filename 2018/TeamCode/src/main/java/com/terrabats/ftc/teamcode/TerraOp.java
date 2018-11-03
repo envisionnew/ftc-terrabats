@@ -1,4 +1,4 @@
-package org.terrabats.ftc.teamcode;
+package com.terrabats.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
