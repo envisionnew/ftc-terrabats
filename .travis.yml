@@ -15,7 +15,7 @@ android:
   - android-sdk-preview-license-.+
   - android-sdk-license-.+ 
 
-before_install: sh build.sh && yes | sdkmanager --licenses && cd ftc_app
+before_install: sh build.sh && cd ftc_app
 
 before_cache:
  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
