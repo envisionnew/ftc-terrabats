@@ -11,7 +11,7 @@ android:
   - extra-google-m2repository
   - extra-android-support
 
-before_install: sh build.sh
+before_install: sh build.sh && cd ftc_app
 
 before_cache:
  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
