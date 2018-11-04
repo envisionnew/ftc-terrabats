@@ -7,12 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 @TeleOp(name = "TerraOp: Test")
 public class TerraOp extends OpMode{
     //All RobotParts
-    Terrabot robot = new Terrabot();
-
-
-
-
-
+    TerraBot robot = new TerraBot();
 
     @Override
     public void init() {
