@@ -8,9 +8,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import static java.lang.Thread.sleep;
 
 
-public class TerraBot {
+public class Terrabot {
 
     /*/ Define all the motors and variables that are being used in Terrabot /*/
 
@@ -101,5 +104,27 @@ public class TerraBot {
 
     public void out(double pos) {
         outtake.setPosition(pos);
+    }
+    public void detectingGoldMineral() {
+        GoldAlignDetector gold = new GoldAlignDetector();
+        ElapsedTime runtime = new ElapsedTime();
+        double result = gold.getXPosition();
+        if (result > 150) {
+            move(1,.25);
+            while(runtime.seconds()<2){}
+            move(0,0);
+        }   else {
+            if (result > 150){
+                move(1, -.25);
+
+                move(0,0);
+            }   else {
+
+                move(1,0);
+                while(runtime.seconds() < 2){};
+                move(0,0);
+            }
+
+        }
     }
 }
