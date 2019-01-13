@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 
-@Autonomous(name="TerraAuto: Crater")
+@Autonomous(name = "TerraAuto: Crater")
 public class AutoCrater extends LinearOpMode {
     Terrabot robot = new Terrabot();
     ElapsedTime timer = new ElapsedTime();
@@ -34,8 +34,7 @@ public class AutoCrater extends LinearOpMode {
         telemetry.addData(">", "Calibrating Gyro");
         telemetry.update();
         robot.gyro.calibrate();
-
-        while (!isStopRequested() && robot.gyro.isCalibrating())  {
+        while (!isStopRequested() && robot.gyro.isCalibrating()) {
             sleep(50);
             idle();
         }
@@ -43,62 +42,99 @@ public class AutoCrater extends LinearOpMode {
         telemetry.update();
         robot.gyro.resetZAxisIntegrator();
         waitForStart();
+        telemetry.addData("Left Working", (robot.left.getConnectionInfo()));
+        telemetry.addData("Left2 Working", (robot.left2.getConnectionInfo()));
+        telemetry.addData("Right Working", (robot.right.getConnectionInfo()));
+        telemetry.addData("Right2 Working", (robot.right2.getConnectionInfo()));
         /* Hanging code */
         timer.reset();
-        while(opModeIsActive()&& timer.seconds() < 2) {
+        while (opModeIsActive() && timer.seconds() < 1.75) {
             robot.neverest.setPower(0.5);
         }
         robot.neverest.setPower(0);
         timer.reset();
+        turnDeg(20, 0.2);
+        timer.reset();
+        while (opModeIsActive() && timer.seconds() < 1) {
+            robot.move(0.5,0);
+        }
         robot.move(0,0);
-        telemetry.addData("IsGyro",(robot.gyro.getHeading() < 358));
+        timer.reset();
+        turnDeg(-15,-0.2);
+        timer.reset();
+        telemetry.addData("IsGyro", (robot.gyro.getHeading() < 358));
         telemetry.update();
         getMineralPosition();
         timer.reset();
-        while (opModeIsActive() && timer.seconds() < 3){
-            telemetry.addData("GoldPos",goldPos);
+        while (opModeIsActive() && timer.seconds() < 3) {
+            telemetry.addData("GoldPos", goldPos);
             telemetry.update();
         }
-        switch (goldPos){
+        switch (goldPos) {
             case "r":
                 telemetry.addLine("going to the right");
+                telemetry.update();
+                turnDeg(20,0.3);
                 timer.reset();
-                turnDeg(20, 0.3);
-                timer.reset();
-                while(opModeIsActive()&&timer.seconds()< 1.5) {
+                while (opModeIsActive() && timer.seconds() < 2) {
                     robot.move(1, 0);
                 }
-                robot.move(0,0);
+                robot.move(0, 0);
+                timer.reset();
+                while (opModeIsActive() && timer.seconds() < 2) {
+                    robot.al.setPower(1);
+                }
+                timer.reset();
                 break;
             case "c":
                 telemetry.addLine("going straight");
+                telemetry.update();
                 timer.reset();
-                while(opModeIsActive()&&timer.seconds()< 1.5) {
+                while (opModeIsActive() && timer.seconds() < 2) {
                     robot.move(1, 0);
                 }
-                robot.move(0,0);
+                robot.move(0, 0);
+                timer.reset();
+                while (opModeIsActive() && timer.seconds() < 2) {
+                    robot.al.setPower(1);
+                }
+                timer.reset();
                 break;
             case "l":
                 telemetry.addLine("going to the left");
+
+                telemetry.update();
                 timer.reset();
-                turnDeg(-20, -0.3);
+                turnDeg(-20,-0.3);
                 timer.reset();
-                while(opModeIsActive()&&timer.seconds()< 1.5) {
+                while (opModeIsActive() && timer.seconds() < 2) {
                     robot.move(1, 0);
                 }
-                robot.move(0,0);
+                robot.move(0, 0);
+                timer.reset();
+                while (opModeIsActive() && timer.seconds() < 2) {
+                    robot.al.setPower(1);
+                }
+                timer.reset();
                 break;
             default:
                 telemetry.addLine("going straight");
+                telemetry.update();
                 timer.reset();
-                while(opModeIsActive()&&timer.seconds()< 1.5) {
+                while (opModeIsActive() && timer.seconds() < 2) {
                     robot.move(1, 0);
                 }
-                robot.move(0,0);
+                robot.move(0, 0);
+                timer.reset();
+                while (opModeIsActive() && timer.seconds() < 2) {
+                    robot.al.setPower(1);
+                }
+                timer.reset();
                 break;
         }
     }
-    private void getMineralPosition(){
+
+    private void getMineralPosition() {
         int goldX = -1;
         int silverX = -1;
         timer.reset();
@@ -106,21 +142,21 @@ public class AutoCrater extends LinearOpMode {
             tfod.activate();
             while (opModeIsActive() && goldX == -1 && silverX == -1 && timer.seconds() < 10) {
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                if(updatedRecognitions != null) {
+                if (updatedRecognitions != null) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
                     if (updatedRecognitions.size() == 2) {
                         for (Recognition recognition : updatedRecognitions) {
                             if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldX = (int)recognition.getLeft();
-                            }else{
-                                silverX = (int)recognition.getLeft();
+                                goldX = (int) recognition.getLeft();
+                            } else {
+                                silverX = (int) recognition.getLeft();
                             }
                         }
-                        if(goldX == -1){
+                        if (goldX == -1) {
                             goldPos = "l";
-                        }else if(goldX < silverX){
+                        } else if (goldX < silverX) {
                             goldPos = "r";
-                        }else{
+                        } else {
                             goldPos = "c";
                         }
                     }
@@ -130,12 +166,14 @@ public class AutoCrater extends LinearOpMode {
             tfod.shutdown();
         }
     }
+
     private void initVuforia() {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
+
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -161,4 +199,3 @@ public class AutoCrater extends LinearOpMode {
         robot.gyro.resetZAxisIntegrator();
     }
 }
-
