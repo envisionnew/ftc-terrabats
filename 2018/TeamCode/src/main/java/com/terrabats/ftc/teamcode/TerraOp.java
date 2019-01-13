@@ -87,6 +87,12 @@ public class TerraOp extends OpMode{
         robot.neverest.setPower(gamepad1.left_trigger);
         robot.neverest.setPower(-gamepad1.right_trigger);
 
+        robot.al.setPower(gamepad2.left_trigger);
+        robot.al.setPower(-gamepad2.right_trigger);
+
+        robot.ar.setPower(gamepad2.left_stick_x);
+        robot.ar.setPower(-gamepad2.left_stick_y);
+
     }
     @Override
     public void stop() {
