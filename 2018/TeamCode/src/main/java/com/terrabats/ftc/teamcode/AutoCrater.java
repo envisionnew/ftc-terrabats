@@ -46,21 +46,27 @@ public class AutoCrater extends LinearOpMode {
         telemetry.addData("Left2 Working", (robot.left2.getConnectionInfo()));
         telemetry.addData("Right Working", (robot.right.getConnectionInfo()));
         telemetry.addData("Right2 Working", (robot.right2.getConnectionInfo()));
+
         /* Hanging code */
+
         timer.reset();
-        while (opModeIsActive() && timer.seconds() < 1.75) {
-            robot.neverest.setPower(0.5);
+        while (opModeIsActive() && timer.seconds() < 1.5) {
+            robot.hang.setPower(0.5);
         }
-        robot.neverest.setPower(0);
+        robot.hang.setPower(0);
         timer.reset();
         turnDeg(20, 0.2);
         timer.reset();
-        while (opModeIsActive() && timer.seconds() < 1) {
+        while (opModeIsActive() && timer.seconds() < 0.5) {
             robot.move(0.5,0);
         }
         robot.move(0,0);
         timer.reset();
         turnDeg(-15,-0.2);
+        timer.reset();
+        while (opModeIsActive() && timer.seconds() < 0.5) {
+            robot.move(0.5,0);
+        }
         timer.reset();
         telemetry.addData("IsGyro", (robot.gyro.getHeading() < 358));
         telemetry.update();
@@ -76,28 +82,22 @@ public class AutoCrater extends LinearOpMode {
                 telemetry.update();
                 turnDeg(20,0.3);
                 timer.reset();
-                while (opModeIsActive() && timer.seconds() < 2) {
+                while (opModeIsActive() && timer.seconds() < 1) {
                     robot.move(1, 0);
                 }
                 robot.move(0, 0);
                 timer.reset();
-                while (opModeIsActive() && timer.seconds() < 2) {
-                    robot.al.setPower(1);
-                }
+                turnDeg(-20,-0.3);
                 timer.reset();
                 break;
             case "c":
                 telemetry.addLine("going straight");
                 telemetry.update();
                 timer.reset();
-                while (opModeIsActive() && timer.seconds() < 2) {
+                while (opModeIsActive() && timer.seconds() < 1) {
                     robot.move(1, 0);
                 }
                 robot.move(0, 0);
-                timer.reset();
-                while (opModeIsActive() && timer.seconds() < 2) {
-                    robot.al.setPower(1);
-                }
                 timer.reset();
                 break;
             case "l":
@@ -107,28 +107,22 @@ public class AutoCrater extends LinearOpMode {
                 timer.reset();
                 turnDeg(-20,-0.3);
                 timer.reset();
-                while (opModeIsActive() && timer.seconds() < 2) {
+                while (opModeIsActive() && timer.seconds() < 1) {
                     robot.move(1, 0);
                 }
                 robot.move(0, 0);
                 timer.reset();
-                while (opModeIsActive() && timer.seconds() < 2) {
-                    robot.al.setPower(1);
-                }
+                turnDeg(20,0.3);
                 timer.reset();
                 break;
             default:
                 telemetry.addLine("going straight");
                 telemetry.update();
                 timer.reset();
-                while (opModeIsActive() && timer.seconds() < 2) {
+                while (opModeIsActive() && timer.seconds() < 1) {
                     robot.move(1, 0);
                 }
                 robot.move(0, 0);
-                timer.reset();
-                while (opModeIsActive() && timer.seconds() < 2) {
-                    robot.al.setPower(1);
-                }
                 timer.reset();
                 break;
         }
@@ -197,5 +191,17 @@ public class AutoCrater extends LinearOpMode {
         }
         robot.move(0, 0);
         robot.gyro.resetZAxisIntegrator();
+    }
+
+    public void TMDrop() {
+        timer.reset();
+        while(opModeIsActive() && timer.seconds() < 1) {
+            robot.move(1,0);
+        }
+        timer.reset();
+        while(opModeIsActive() && timer.seconds() < 0.1) {
+            robot.move(-1,0);
+        }
+
     }
 }
