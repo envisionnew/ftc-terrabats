@@ -4,6 +4,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.vuforia.CameraDevice;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -34,14 +35,18 @@ public class AutoCrater extends LinearOpMode {
         telemetry.addData(">", "Calibrating Gyro");
         telemetry.update();
         robot.gyro.calibrate();
+
         while (!isStopRequested() && robot.gyro.isCalibrating()) {
             sleep(50);
             idle();
         }
+
         telemetry.addData("!!!", "Done Calibrating");
         telemetry.update();
         robot.gyro.resetZAxisIntegrator();
+
         waitForStart();
+
         telemetry.addData("Left Working", (robot.left.getConnectionInfo()));
         telemetry.addData("Left2 Working", (robot.left2.getConnectionInfo()));
         telemetry.addData("Right Working", (robot.right.getConnectionInfo()));
@@ -50,23 +55,30 @@ public class AutoCrater extends LinearOpMode {
         /* Hanging code */
 
         timer.reset();
+
         while (opModeIsActive() && timer.seconds() < 1.5) {
             robot.hang.setPower(0.5);
         }
+
         robot.hang.setPower(0);
         timer.reset();
         turnDeg(20, 0.2);
         timer.reset();
-        while (opModeIsActive() && timer.seconds() < 0.5) {
-            robot.move(0.5,0);
+
+        while (opModeIsActive() && timer.seconds() < 0.3) {
+            robot.move(0.5, 0);
         }
-        robot.move(0,0);
+
+        robot.move(0, 0);
         timer.reset();
-        turnDeg(-15,-0.2);
+        turnDeg(-19, -0.2);
         timer.reset();
-        while (opModeIsActive() && timer.seconds() < 0.5) {
-            robot.move(0.5,0);
-        }
+
+        //while (opModeIsActive() && timer.seconds() < 0.1) {
+        //  robot.move(-0.5,0);
+        //}
+
+        robot.move(0, 0);
         timer.reset();
         telemetry.addData("IsGyro", (robot.gyro.getHeading() < 358));
         telemetry.update();
@@ -78,57 +90,63 @@ public class AutoCrater extends LinearOpMode {
         }
         switch (goldPos) {
             case "r":
+                timer.reset();
+                turnDeg(20, 0.3);
+                timer.reset();
                 telemetry.addLine("going to the right");
                 telemetry.update();
-                turnDeg(20,0.3);
-                timer.reset();
+                //turnDeg(20,0.3);
+                //timer.reset();
                 while (opModeIsActive() && timer.seconds() < 1) {
                     robot.move(1, 0);
                 }
                 robot.move(0, 0);
                 timer.reset();
-                turnDeg(-20,-0.3);
+                turnDeg(-20, -0.3);
                 timer.reset();
                 break;
             case "c":
                 telemetry.addLine("going straight");
                 telemetry.update();
                 timer.reset();
+                turnDeg(20, 0.3);
+                timer.reset();
+                while (opModeIsActive() && timer.seconds() < 0.2) {
+                    robot.move(0.5, 0);
+                }
+                robot.move(0, 0);
+                timer.reset();
+                turnDeg(-15, 0.3);
                 while (opModeIsActive() && timer.seconds() < 1) {
                     robot.move(1, 0);
                 }
-                robot.move(0, 0);
                 timer.reset();
                 break;
             case "l":
+                timer.reset();
+                turnDeg(20, 0.3);
+                timer.reset();
+                while (opModeIsActive() && timer.seconds() < 0.5) {
+                    robot.move(1, 0);
+                }
+                robot.move(0, 0);
                 telemetry.addLine("going to the left");
-
                 telemetry.update();
                 timer.reset();
-                turnDeg(-20,-0.3);
+                turnDeg(-20, -0.3);
                 timer.reset();
                 while (opModeIsActive() && timer.seconds() < 1) {
                     robot.move(1, 0);
                 }
                 robot.move(0, 0);
                 timer.reset();
-                turnDeg(20,0.3);
-                timer.reset();
-                break;
-            default:
-                telemetry.addLine("going straight");
-                telemetry.update();
-                timer.reset();
-                while (opModeIsActive() && timer.seconds() < 1) {
-                    robot.move(1, 0);
-                }
-                robot.move(0, 0);
+                turnDeg(20, 0.3);
                 timer.reset();
                 break;
         }
     }
 
-    private void getMineralPosition() {
+    private void getMineralPosition(){
         int goldX = -1;
         int silverX = -1;
         timer.reset();
@@ -136,21 +154,21 @@ public class AutoCrater extends LinearOpMode {
             tfod.activate();
             while (opModeIsActive() && goldX == -1 && silverX == -1 && timer.seconds() < 10) {
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                if (updatedRecognitions != null) {
+                if(updatedRecognitions != null) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
                     if (updatedRecognitions.size() == 2) {
                         for (Recognition recognition : updatedRecognitions) {
                             if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldX = (int) recognition.getLeft();
-                            } else {
-                                silverX = (int) recognition.getLeft();
+                                goldX = (int)recognition.getLeft();
+                            }else{
+                                silverX = (int)recognition.getLeft();
                             }
                         }
-                        if (goldX == -1) {
+                        if(goldX == -1){
                             goldPos = "l";
-                        } else if (goldX < silverX) {
+                        }else if(goldX < silverX){
                             goldPos = "r";
-                        } else {
+                        }else{
                             goldPos = "c";
                         }
                     }
@@ -159,6 +177,7 @@ public class AutoCrater extends LinearOpMode {
             }
             tfod.shutdown();
         }
+        CameraDevice.getInstance().setFlashTorchMode(false);
     }
 
     private void initVuforia() {
@@ -166,15 +185,17 @@ public class AutoCrater extends LinearOpMode {
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        CameraDevice.getInstance().setFlashTorchMode(true);
     }
 
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minimumConfidence = 0.5;
+        tfodParameters.minimumConfidence = 0.4;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
+
     }
 
     public void turnDeg(double deg, double power) {
@@ -195,12 +216,12 @@ public class AutoCrater extends LinearOpMode {
 
     public void TMDrop() {
         timer.reset();
-        while(opModeIsActive() && timer.seconds() < 1) {
-            robot.move(1,0);
+        while (opModeIsActive() && timer.seconds() < 1) {
+            robot.move(1, 0);
         }
         timer.reset();
-        while(opModeIsActive() && timer.seconds() < 0.1) {
-            robot.move(-1,0);
+        while (opModeIsActive() && timer.seconds() < 0.1) {
+            robot.move(-1, 0);
         }
 
     }
