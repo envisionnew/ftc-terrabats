@@ -131,6 +131,14 @@ public class TerraRunner {
     public void intake(double p){
         intake.setPower(p);
     }
+    public void moveDis(double dis, double p, LinearOpMode o){
+        int d = (int) (dis*TICKS_FOR_MOVE);
+        l1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        l1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        move(p,0);
+        while (o.opModeIsActive() && (l1.getCurrentPosition() > d)){}
+        move(0,0);
+    }
     private enum ExtMode{
         FORWARD,
         REVERSE,
