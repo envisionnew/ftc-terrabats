@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -8,168 +7,138 @@ import com.vuforia.CameraDevice;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
 
-
 @Autonomous(name = "TerraAuto: Crater")
 public class AutoCrater extends LinearOpMode {
-    Terrabot robot = new Terrabot();
+    TerraRunner bot = new TerraRunner();
     ElapsedTime timer = new ElapsedTime();
     private String goldPos = "c";
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
-    private static final String VUFORIA_KEY = "AWmKObX/////AAABmYb6oMBM9kDCg3sYoFPoVDBmzHX6yr4hMZ49TFMft1lZNHbrBnNlk1LQt0TnLInh/68lkCxQD6EHxPTOovDxYhjo4CkanvnpIU0HGctTwj9v0S3CSZqTHI0cOlT2SuollZoQkTMrdUY4y3YjtLbiPsmYprc9994qPWPR3iltRb+IkHceIuG2yHxNhiNwbIwfllFtfmhXtDWk4Zw1MSI65lLb1qkAHmUE8vatCiT5QY4y8Fnx+MF0GRLM0W8TXH182agrf+jBbLx2by32HRfh8dmCST0/Lj+g7Qccpsfv2x8B2tg+i95zYmSg0Slmr4hkZ3f4tIKpFUnFgdBWe08BD1Lt/N+jlerdrsdYM8wHx2ra";
+    private static final String VUFORIA_KEY = "AWmKObX/////AAABmYb6oMBM9kDCg3sYoFPoVDBmzHX6yr4hMZ49TFMft1lZNH" +
+            "brBnNlk1LQt0TnLInh/68lkCxQD6EHxPTOovDxYhjo4CkanvnpIU0HGctTwj9v0S3CSZqTHI0cOlT2SuollZoQkTMrdUY4y3YjtLbiPs" +
+            "mYprc9994qPWPR3iltRb+IkHceIuG2yHxNhiNwbIwfllFtfmhXtDWk4Zw1MSI65lLb1qkAHmUE8vatCiT5QY4y8Fnx+MF0GRLM0W8TXH182agrf" +
+            "+jBbLx2by32HRfh8dmCST0/Lj+g7Qccpsfv2x8B2tg+i95zYmSg0Slmr4hkZ3f4tIKpFUnFgdBWe08BD1Lt/N+jlerdrsdYM8wHx2ra";
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
+    boolean gold = false;
 
     @Override
     public void runOpMode() {
-        initVuforia();
-        robot.init(hardwareMap);
-        initTfod();
-        telemetry.addData(">", "Calibrating Gyro");
-        telemetry.update();
-        robot.gyro.calibrate();
+        bot.init(hardwareMap);
 
-        while (!isStopRequested() && robot.gyro.isCalibrating()) {
-            sleep(50);
-            idle();
-        }
-
-        telemetry.addData("!!!", "Done Calibrating");
-        telemetry.update();
-        robot.gyro.resetZAxisIntegrator();
-
-        waitForStart();
-
-        telemetry.addData("Left Working", (robot.left.getConnectionInfo()));
-        telemetry.addData("Left2 Working", (robot.left2.getConnectionInfo()));
-        telemetry.addData("Right Working", (robot.right.getConnectionInfo()));
-        telemetry.addData("Right2 Working", (robot.right2.getConnectionInfo()));
-
-        /* Hanging code */
-
-        timer.reset();
-
-        while (opModeIsActive() && timer.seconds() < 1.5) {
-            robot.hang.setPower(0.5);
-        }
-
-        robot.hang.setPower(0);
-        timer.reset();
-        turnDeg(20, 0.2);
-        timer.reset();
-
-        while (opModeIsActive() && timer.seconds() < 0.3) {
-            robot.move(0.5, 0);
-        }
-
-        robot.move(0, 0);
-        timer.reset();
-        turnDeg(-19, -0.2);
-        timer.reset();
-
-        //while (opModeIsActive() && timer.seconds() < 0.1) {
-        //  robot.move(-0.5,0);
-        //}
-
-        robot.move(0, 0);
-        timer.reset();
-        telemetry.addData("IsGyro", (robot.gyro.getHeading() < 358));
-        telemetry.update();
-        getMineralPosition();
-        timer.reset();
-        while (opModeIsActive() && timer.seconds() < 3) {
-            telemetry.addData("GoldPos", goldPos);
+        while (bot.gyro.isCalibrating() && opModeIsActive()) {
+            telemetry.addData("Is calibrating", "");
             telemetry.update();
         }
+
+        initVuforia();
+        initTfod();
+        telemetry.addData("Done Calibrating", "Ready to Start");
+        telemetry.update();
+        waitForStart();
+        timer.reset();
+
+        while (opModeIsActive() && timer.seconds() < 1.6) {
+            bot.hang.setPower(0.5);
+        }
+        bot.hang.setPower(0);
+
+        bot.moveDis(12, 0.8, this);
+        bot.turnDeg(-20, 0.5, TerraRunner.TurnMode.GYRO, this);
+        timer.reset();
+        pause(1);
+        bot.turnDeg(20, 0.5, TerraRunner.TurnMode.GYRO, this);
+
+        getMineralPosition();
+        telemetry.addData("MineralPos", goldPos);
+        telemetry.update();
+
         switch (goldPos) {
             case "r":
-                timer.reset();
-                turnDeg(20, 0.3);
-                timer.reset();
-                telemetry.addLine("going to the right");
-                telemetry.update();
-                //turnDeg(20,0.3);
-                //timer.reset();
-                while (opModeIsActive() && timer.seconds() < 1) {
-                    robot.move(1, 0);
-                }
-                robot.move(0, 0);
-                timer.reset();
-                turnDeg(-20, -0.3);
-                timer.reset();
+                bot.turnDeg(-30, 0.5, TerraRunner.TurnMode.GYRO, this);
+                bot.moveDis(23, 0.5, this);
+                bot.moveDis(19, -.5, this);
+                bot.turnDeg(90, .5, TerraRunner.TurnMode.GYRO, this);
+                bot.moveDis(27, .5, this);
+                sleep(700);
+                bot.turnDeg(45, .5, TerraRunner.TurnMode.GYRO, this);
+                sleep(500);
+                bot.moveDis(48, .5, this);
+                DropTM();
+                bot.move(0, 0);
                 break;
             case "c":
-                telemetry.addLine("going straight");
-                telemetry.update();
-                timer.reset();
-                turnDeg(20, 0.3);
-                timer.reset();
-                while (opModeIsActive() && timer.seconds() < 0.2) {
-                    robot.move(0.5, 0);
-                }
-                robot.move(0, 0);
-                timer.reset();
-                turnDeg(-15, 0.3);
-                while (opModeIsActive() && timer.seconds() < 1) {
-                    robot.move(1, 0);
-                }
-                timer.reset();
+                bot.moveDis(23, 0.5, this);
+                bot.moveDis(19, -.5, this);
+                bot.turnDeg(60, .5, TerraRunner.TurnMode.GYRO, this);
+                bot.moveDis(28, .5, this);
+                sleep(700);
+                bot.turnDeg(45, .5, TerraRunner.TurnMode.GYRO, this);
+                sleep(500);
+                bot.moveDis(48, .5, this);
+                DropTM();
+                bot.move(0, 0);
                 break;
             case "l":
-                timer.reset();
-                turnDeg(20, 0.3);
-                timer.reset();
-                while (opModeIsActive() && timer.seconds() < 0.5) {
-                    robot.move(1, 0);
-                }
-                robot.move(0, 0);
-                telemetry.addLine("going to the left");
-                telemetry.update();
-                timer.reset();
-                turnDeg(-20, -0.3);
-                timer.reset();
-                while (opModeIsActive() && timer.seconds() < 1) {
-                    robot.move(1, 0);
-                }
-                robot.move(0, 0);
-                timer.reset();
-                turnDeg(20, 0.3);
-                timer.reset();
+                bot.turnDeg(30, 0.5, TerraRunner.TurnMode.GYRO, this);
+                bot.moveDis(23, 0.5, this);
+                bot.moveDis(19, -.5, this);
+                bot.turnDeg(30, .5, TerraRunner.TurnMode.GYRO, this);
+                bot.moveDis(10, .5, this);
+                sleep(700);
+                bot.turnDeg(45, .5, TerraRunner.TurnMode.GYRO, this);
+                sleep(500);
+                bot.moveDis(48, .5, this);
+                DropTM();
+                bot.move(0, 0);
                 break;
         }
+
+        bot.moveDis(61, -.5, this);
+        timer.reset();
+
+        while (opModeIsActive() && timer.seconds() < 1.7) {
+            bot.hang.setPower(-0.5);
+        }
+        bot.hang.setPower(0);
+
+
     }
 
-    private void getMineralPosition(){
+    private void getMineralPosition() {
         int goldX = -1;
         int silverX = -1;
-        timer.reset();
+        int i = 0;
         if (opModeIsActive()) {
             tfod.activate();
-            while (opModeIsActive() && goldX == -1 && silverX == -1 && timer.seconds() < 10) {
+            timer.reset();
+            while (opModeIsActive() && i != 2) {
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                if(updatedRecognitions != null) {
+                if (updatedRecognitions != null) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
                     if (updatedRecognitions.size() == 2) {
                         for (Recognition recognition : updatedRecognitions) {
                             if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldX = (int)recognition.getLeft();
-                            }else{
-                                silverX = (int)recognition.getLeft();
+                                goldX = (int) recognition.getLeft();
+                                telemetry.update();
+                                gold = true;
+                                i += 1;
+                            } else {
+                                if (recognition.getLabel().equals(LABEL_SILVER_MINERAL)) {
+                                    silverX = (int) recognition.getLeft();
+                                    telemetry.addLine("Silver Found");
+                                    telemetry.update();
+                                    i += 1;
+                                }
+
                             }
-                        }
-                        if(goldX == -1){
-                            goldPos = "l";
-                        }else if(goldX < silverX){
-                            goldPos = "r";
-                        }else{
-                            goldPos = "c";
+
                         }
                     }
                     telemetry.update();
@@ -178,51 +147,60 @@ public class AutoCrater extends LinearOpMode {
             tfod.shutdown();
         }
         CameraDevice.getInstance().setFlashTorchMode(false);
+        if (goldX == -1) {
+            goldPos = "r";
+        } else if (goldX > silverX) {
+            goldPos = "c";
+        } else {
+            goldPos = "l";
+        }
     }
 
     private void initVuforia() {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraDirection = CameraDirection.BACK;
+        parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
-        CameraDevice.getInstance().setFlashTorchMode(true);
+        CameraDevice.getInstance().setFlashTorchMode(false);
     }
 
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minimumConfidence = 0.4;
+        tfodParameters.minimumConfidence = 0.8;
+
+        tfodParameters.useObjectTracker = true;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
-
     }
 
-    public void turnDeg(double deg, double power) {
-        if (deg < 0) {
-            robot.gyro.setHeadingMode(ModernRoboticsI2cGyro.HeadingMode.HEADING_CARTESIAN);
-            deg = -deg;
-        } else {
-            robot.gyro.setHeadingMode(ModernRoboticsI2cGyro.HeadingMode.HEADING_CARDINAL);
+    public void DropTM(LinearOpMode o) {
+        timer.reset();
+        while (o.opModeIsActive() && timer.seconds() < .3) {
+            bot.move(1, 0);
         }
-        robot.move(0, power);
-        while (opModeIsActive() && robot.gyro.getHeading() < deg) {
-            telemetry.addData("Gyro: ", robot.gyro.getHeading());
-            telemetry.update();
+        bot.move(0, 0);
+        timer.reset();
+        while (o.opModeIsActive() && timer.seconds() < .2) {
+            bot.move(-1, 0);
         }
-        robot.move(0, 0);
-        robot.gyro.resetZAxisIntegrator();
+        bot.move(0, 0);
+        timer.reset();
     }
 
-    public void TMDrop() {
-        timer.reset();
-        while (opModeIsActive() && timer.seconds() < 1) {
-            robot.move(1, 0);
+    public void pause(double x) {
+        while (opModeIsActive() && timer.seconds() < x) {
         }
-        timer.reset();
-        while (opModeIsActive() && timer.seconds() < 0.1) {
-            robot.move(-1, 0);
-        }
+    }
 
+    public void DropTM() {
+        while (opModeIsActive() && bot.getArmAngle() < 135) {
+            bot.arm.setPower(0.5);
+        }
+        while (opModeIsActive() && bot.getArmAngle() > 135) {
+            bot.arm.setPower(-0.5);
+        }
     }
 }
+
